@@ -38,9 +38,9 @@ __all__ = ('Certificate', 'Connection', 'Session', 'APNs', 'Message', 'Result')
 class Certificate(object):
     """ Certificate with private key. """
 
-    def __init__(self, cert_string=None, cert_file=None, key_string=None, key_file=None, passphrase=None):
+    def __init__(self, cert_string=None, cert_file=None, key_string=None, key_file=None, passphrase=None, context_method=OpenSSL.SSL.TLSv1_METHOD):
         """ Provider's certificate and private key.
-        
+
             Your certificate will probably contain the private key. Open it
             with any text editor, it should be plain text (PEM format). The
             certificate is enclosed in ``BEGIN/END CERTIFICATE`` strings and
@@ -63,8 +63,8 @@ class Certificate(object):
                 - `key_file` (str): private key in PEM format from file.
                 - `passphrase` (str): passphrase for your private key.
         """
-        self._context = OpenSSL.SSL.Context(OpenSSL.SSL.SSLv3_METHOD)
-        
+        self._context = OpenSSL.SSL.Context(context_method)
+
         if cert_file:
             # we have to load certificate for equality check. there is no
             # other way to obtain certificate from context.
@@ -84,7 +84,7 @@ class Certificate(object):
             self._context.use_privatekey(pk)
         elif key_file and not passphrase:
             self._context.use_privatekey_file(key_file, OpenSSL.crypto.FILETYPE_PEM)
-                    
+
         else:
             if key_file:
                 # key file is provided with passphrase. context.use_privatekey_file
@@ -135,7 +135,7 @@ class Connection(object):
 
             If your application is multi-threaded, then you have to lock this
             connection before changing anything. Simply use the connection as
-            context manager in ``with`` statement. 
+            context manager in ``with`` statement.
 
             .. note::
                 You don't have to deal with locking at all if you just use
@@ -447,7 +447,7 @@ class Session(object):
         "feedback_sandbox": ("feedback.sandbox.push.apple.com", 2196),
         "feedback_production": ("feedback.push.apple.com", 2196),
     }
-    
+
     def __init__(self):
         """ Persistent connection pool.
 
@@ -455,7 +455,7 @@ class Session(object):
             expect to send another message within few minutes. SSL hanshaking
             is slow, so preserving a connection will increase your message
             throughput.
-            
+
             This class keeps connection descriptors for you, but it is your
             responsibility to keep reference to session instances, otherwise
             the session will be garbage collected and all connections will be
@@ -466,7 +466,7 @@ class Session(object):
     @classmethod
     def new_connection(cls, address="feedback_sandbox", certificate=None, **cert_params):
         """ Obtain non-cached connection to APNs.
-            
+
             Unlike :func:`get_connection` this method does not cache the
             connection.  Use it to fetch feedback from APNs and then close when
             you are done.
@@ -596,7 +596,7 @@ class APNs(object):
             to wait for any response at the end of :func:`send`. So, any send
             will take time needed for sending everything plus ``tail_timeout``.
             Blame Apple for this.
-        
+
             :Arguments:
                 - `connection` (:class:`Connection`): the connection to talk to.
                 - `packet_size` (int): minimum size of IO buffer in bytes.
@@ -608,7 +608,7 @@ class APNs(object):
 
     def send(self, message):
         """ Send the message.
-        
+
             The method will block until the whole message is sent. Method returns
             :class:`Result` object, which you can examine for possible errors and
             retry attempts.
@@ -668,7 +668,7 @@ class APNs(object):
             not available anymore, probably because application was
             uninstalled. You have to stop sending notifications to that device
             token unless it has been re-registered since reported timestamp.
-            
+
             Unlike sending the message, you should fetch the feedback using
             non-cached connection. Once whole feedback has been read, this
             method will automatically close the connection.
@@ -767,7 +767,7 @@ class Message(object):
 
             If you use ``pickle``, then simply pickle/unpickle the message object.
             If you use something else, like JSON, then::
-                
+
                 # obtain state dict from message
                 state = message.__getstate__()
                 # send/store the state
@@ -797,7 +797,7 @@ class Message(object):
             ret.update(self.extra)
 
         return ret
-    
+
     def __setstate__(self, state):
         """ Overwrite message state with given kwargs. """
         self._tokens = state['tokens']
@@ -829,7 +829,7 @@ class Message(object):
         """ Returns the payload content as a `dict`. """
         if self._payload is not None:
             return self._payload
-        
+
         aps = {
             # XXX: we do not check alert, which could be string or dict with extra options
             'alert': self.alert
@@ -844,7 +844,7 @@ class Message(object):
         ret = {
             'aps': aps,
         }
-        
+
         if self.extra:
             ret.update(self.extra)
 
@@ -892,7 +892,7 @@ class Batch(object):
         self.payload = payload
         self.expiry = expiry
         self.packet_size = packet_size
-        
+
     def __iter__(self):
         """ Iterate over serialized chunks. """
         messages = []
@@ -1000,7 +1000,7 @@ class Result(object):
 
     def retry(self):
         """ Returns :class:`Message` with device tokens that can be retried.
-       
+
             Current APNs protocol bails out on first failure, so any device
             token after the failure should be retried. If failure was related
             to the token, then it will appear in :attr:`failed` set and will be
