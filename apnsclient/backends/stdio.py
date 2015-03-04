@@ -36,12 +36,16 @@ LOG = logging.getLogger(__name__)
 class Certificate(BaseCertificate):
     """ pyOpenSSL certificate implementation. """
 
-    def load_context(self, cert_string=None, cert_file=None, key_string=None, key_file=None, passphrase=None):
+    def load_context(self, cert_string=None, cert_file=None, key_string=None,
+                     key_file=None, passphrase=None,
+                     context_method=OpenSSL.SSL.TLSv1_2_METHOD,
+                     context_options=OpenSSL.SSL.OP_NO_SSLv3):
         """ Initialize and load certificate context. """
-        context = OpenSSL.SSL.Context(OpenSSL.SSL.SSLv3_METHOD)
+        context = OpenSSL.SSL.Context(context_method)
+        context.set_options(context_options)
         if passphrase is not None and not isinstance(passphrase, six.binary_type):
             passphrase = six.b(passphrase)
-        
+
         if cert_file:
             # we have to load certificate for equality check. there is no
             # other way to obtain certificate from context.
@@ -102,7 +106,7 @@ class Certificate(BaseCertificate):
 
     def dump_certificate(self, raw_certificate):
         """ Dump certificate as PEM string.
-        
+
             :Arguments:
                 - context (object): certificate context as returned by :func:`load_context`
 
@@ -333,7 +337,7 @@ class Connection(BaseConnection):
                 if not ret:
                     # in case recv() responds with empty string
                     ret = None
-                
+
                 return ret
             except OpenSSL.SSL.ZeroReturnError:
                 # nice end of stream
@@ -369,7 +373,7 @@ class Backend(BaseBackend):
 
     def get_new_connection(self, address, certificate, timeout=None):
         """ Open a new connection.
-        
+
             :Arguments:
                 - address (tuple): target (host, port).
                 - certificate (:class:`Certificate`): certificate instance.
