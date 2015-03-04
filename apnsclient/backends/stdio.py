@@ -39,7 +39,7 @@ class Certificate(BaseCertificate):
     def load_context(self, cert_string=None, cert_file=None, key_string=None,
                      key_file=None, passphrase=None,
                      context_method=OpenSSL.SSL.TLSv1_2_METHOD,
-                     context_options=OpenSSL.SSL.OP_NO_SSLv3):
+                     context_options=OpenSSL.SSL.OP_NO_SSLv3 | OpenSSL.SSL.OP_NO_SSLv2):
         """ Initialize and load certificate context. """
         context = OpenSSL.SSL.Context(context_method)
         context.set_options(context_options)
