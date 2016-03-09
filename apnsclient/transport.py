@@ -47,7 +47,7 @@ class Session(object):
     DEFAULT_READ_TIMEOUT = 20
     # Default timeout waiting for error response at the end message send operation.
     DEFAULT_READ_TAIL_TIMEOUT = 3
-    
+
     def __init__(self, pool="apnsclient.backends.stdio",
                        connect_timeout=DEFAULT_CONNECT_TIMEOUT,
                        write_buffer_size=DEFAULT_WRITE_BUFFER_SIZE,
@@ -119,7 +119,7 @@ class Session(object):
     def new_connection(self, address="feedback_sandbox", certificate=None, **cert_params):
         """ Obtain new connection to APNs. This method will not re-use existing
             connection from the pool. The connection will be closed after use.
-            
+
             Unlike :func:`get_connection` this method does not cache the
             connection.  Use it to fetch feedback from APNs and then close when
             you are done.
@@ -204,7 +204,7 @@ class Connection(object):
 
     def __init__(self, address, certificate, session, use_cache=False):
         """ New connection wrapper.
-            
+
             :Arguments:
                 - address (tuple) - (host, port) to connect to.
                 - certificate (:class:`BaseCertificate`) - provider certificate.

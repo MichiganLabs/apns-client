@@ -42,7 +42,7 @@ class APNs(object):
 
     def send(self, message):
         """ Send the message.
-        
+
             The method will block until the whole message is sent. The method
             returns :class:`Result` object, which you can examine for possible
             errors and retry attempts.
@@ -98,7 +98,7 @@ class APNs(object):
             not available anymore, probably because application was
             uninstalled. You have to stop sending notifications to that device
             token unless it has been re-registered since reported timestamp.
-            
+
             Unlike sending the message, you should fetch the feedback using
             non-cached connection. Once whole feedback has been read, this
             method will automatically close the connection.
@@ -259,7 +259,7 @@ class Message(object):
 
             If you use ``pickle``, then simply pickle/unpickle the message object.
             If you use something else, like JSON, then::
-                
+
                 # obtain state dict from message
                 state = message.__getstate__()
                 # send/store the state
@@ -287,7 +287,7 @@ class Message(object):
 
         return dict([(key, getattr(self, key)) for key in ('tokens', 'alert', 'badge',
                     'sound', 'content_available', 'expiry', 'priority', 'extra')])
-    
+
     def __setstate__(self, state):
         """ Overwrite message state with given kwargs. """
         self._tokens = state['tokens']
@@ -327,7 +327,7 @@ class Message(object):
         """ Returns the payload content as a dict or raw ``payload`` argument value. """
         if self._payload is not None:
             return self._payload
-        
+
         # in v.2 protocol no keys are required, but usually you specify
         # alert or content-available.
         aps = {}
@@ -347,7 +347,7 @@ class Message(object):
         ret = {
             'aps': aps,
         }
-        
+
         if self.extra:
             ret.update(self.extra)
 
@@ -407,7 +407,7 @@ class Batch(object):
         self.expiry = expiry
         self.priority = priority
         self.packet_size = packet_size
-        
+
     def __iter__(self):
         """ Iterate over serialized chunks. """
         messages = []
@@ -545,7 +545,7 @@ class Result(object):
 
     def retry(self):
         """ Returns :class:`Message` with device tokens that can be retried.
-       
+
             Current APNs protocol bails out on first failure, so any device
             token after the failure should be retried. If failure was related
             to the token, then it will appear in :attr:`failed` set and will be
