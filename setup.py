@@ -19,7 +19,7 @@ setup(
     packages=['apnsclient'],
     license="Apache 2.0",
     keywords='apns push notification apple messaging iOS',
-    install_requires=['pyOpenSSL'],
+    install_requires=['pyOpenSSL', 'six'],
     test_require=['mock'],
     classifiers = [ 'Development Status :: 4 - Beta',
                     'Intended Audience :: Developers',
